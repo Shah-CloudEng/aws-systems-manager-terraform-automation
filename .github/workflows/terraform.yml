@@ -1,16 +1,6 @@
 name: AWS Systems Manager Terraform Automation
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'environments/**'
-      - 'modules/**'
-      - '.github/workflows/terraform.yml'
-  pull_request:
-    branches:
-      - main
   workflow_dispatch:
 
 env:
