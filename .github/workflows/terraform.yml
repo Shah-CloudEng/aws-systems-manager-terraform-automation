@@ -31,10 +31,17 @@ jobs:
       - name: Terraform Format Check
         id: fmt
         run: |
-          # Format check excludes lock files
+          # Format check BEFORE init to avoid lock file conflicts
           terraform fmt -check -recursive ../../modules/
           terraform fmt -check -recursive .
         continue-on-error: true
+
+      - name: Format Check Results
+        if: steps.fmt.outcome == 'failure'
+        run: |
+          echo "::error::Terraform files are not formatted correctly"
+          echo "Run 'terraform fmt -recursive' locally to fix formatting"
+          exit 1
 
       - name: Terraform Init
         id: init
@@ -43,13 +50,6 @@ jobs:
       - name: Terraform Validate
         id: validate
         run: terraform validate
-
-      - name: Format Check Results
-        if: steps.fmt.outcome == 'failure'
-        run: |
-          echo "::error::Terraform files are not formatted correctly"
-          echo "Run 'terraform fmt -recursive' locally to fix formatting"
-          exit 1
 
   terraform-plan:
     name: Terraform Plan
