@@ -45,11 +45,11 @@ jobs:
 
       - name: Terraform Init
         id: init
-        run: terraform init -backend=false
+        run: terraform init -backend=false -no-color
 
       - name: Terraform Validate
         id: validate
-        run: terraform validate
+        run: terraform validate -no-color
 
   terraform-plan:
     name: Terraform Plan
