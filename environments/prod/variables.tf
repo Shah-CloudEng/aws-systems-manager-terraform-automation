@@ -50,13 +50,13 @@ variable "allowed_ssh_cidr" {
 variable "instance_count" {
   description = "Number of EC2 instances to create"
   type        = number
-  default     = 2  # Free tier: 750 hours/month = ~1 instance 24/7, using 2 for HA
+  default     = 2 # Free tier: 750 hours/month = ~1 instance 24/7, using 2 for HA
 }
 
 variable "instance_type" {
   description = "EC2 instance type (t2.micro is free tier eligible)"
   type        = string
-  default     = "t2.micro"  # Free tier: 750 hours per month
+  default     = "t2.micro" # Free tier: 750 hours per month
 }
 
 variable "ami_name_filter" {
@@ -156,7 +156,7 @@ variable "unhealthy_threshold" {
 variable "log_retention_days" {
   description = "Number of days to retain logs in S3 (Free tier: 5 GB storage)"
   type        = number
-  default     = 30  # Reduced for free tier
+  default     = 30 # Reduced for free tier
 }
 
 variable "enable_s3_versioning" {
@@ -169,7 +169,7 @@ variable "enable_s3_versioning" {
 variable "log_retention_in_days" {
   description = "CloudWatch log retention in days (Free tier: 5 GB ingestion, 10 metrics, 10 alarms)"
   type        = number
-  default     = 7  # Reduced for free tier to minimize storage
+  default     = 7 # Reduced for free tier to minimize storage
 }
 
 # Tags
