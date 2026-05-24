@@ -13,7 +13,7 @@ env:
 
 jobs:
   terraform-validate:
-    name: Terraform Format and Validate
+    name: Terraform Validate
     runs-on: ubuntu-latest
     defaults:
       run:
