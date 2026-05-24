@@ -1,0 +1,73 @@
+# AWS Region Configuration
+aws_region = "us-east-1"
+
+# Project Information
+project_name = "LinuxAutomation"
+environment  = "Production"
+
+# Existing VPC Configuration
+# IMPORTANT: Replace these with your actual VPC and subnet IDs
+existing_vpc_id = "vpc-xxxxxxxxxxxxxxxxx"
+
+# Public subnets for ALB (must be in different AZs)
+public_subnet_ids = [
+  "subnet-xxxxxxxxxxxxxxxxx", # us-east-1a
+  "subnet-yyyyyyyyyyyyyyyyy"  # us-east-1b
+]
+
+# Private subnets for EC2 instances (must be in different AZs)
+private_subnet_ids = [
+  "subnet-zzzzzzzzzzzzzzzzz", # us-east-1a
+  "subnet-aaaaaaaaaaaaaaaa"   # us-east-1b
+]
+
+# SSH Access Configuration
+# Replace with your IP range or VPC CIDR
+allowed_ssh_cidr = "10.0.0.0/16"
+
+# EC2 Configuration (Free Tier Optimized)
+instance_count = 2          # Free tier: 750 hours/month allows ~1 instance 24/7
+instance_type  = "t2.micro" # Free tier eligible (t3.micro is NOT free tier)
+
+# AMI Filter (Amazon Linux 2023)
+ami_name_filter = "al2023-ami-*-x86_64"
+
+# Systems Manager Configuration
+ssm_association_schedule = "rate(30 minutes)"
+inventory_collection_interval = "30"
+
+# Patch Manager Configuration
+# Schedule: Every Sunday at 2 AM UTC
+maintenance_window_schedule  = "cron(0 2 ? * SUN *)"
+maintenance_window_duration  = 2
+maintenance_window_cutoff    = 1
+
+# Patch classifications to install
+patch_classification = ["Security", "Bugfix", "Enhancement"]
+
+# Patch severity levels
+patch_severity = ["Critical", "Important", "Medium"]
+
+# ALB Configuration
+enable_deletion_protection = false
+alb_idle_timeout          = 60
+
+# Health Check Configuration
+health_check_path     = "/"
+health_check_interval = 30
+health_check_timeout  = 5
+healthy_threshold     = 2
+unhealthy_threshold   = 2
+
+# S3 Configuration (Free Tier: 5 GB storage)
+log_retention_days   = 30  # Reduced for free tier
+enable_s3_versioning = false  # Disabled to save storage on free tier
+
+# CloudWatch Configuration (Free Tier: 5 GB logs, 10 metrics, 10 alarms)
+log_retention_in_days = 7  # Reduced for free tier
+
+# Additional Tags (Optional)
+additional_tags = {
+  CostCenter = "Engineering"
+  Team       = "DevOps"
+}
