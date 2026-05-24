@@ -30,7 +30,10 @@ jobs:
 
       - name: Terraform Format Check
         id: fmt
-        run: terraform fmt -check -recursive
+        run: |
+          # Format check excludes lock files
+          terraform fmt -check -recursive ../../modules/
+          terraform fmt -check -recursive .
         continue-on-error: true
 
       - name: Terraform Init
