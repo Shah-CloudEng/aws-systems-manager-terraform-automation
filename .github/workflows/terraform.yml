@@ -1,6 +1,9 @@
 name: AWS Systems Manager Terraform Automation
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
