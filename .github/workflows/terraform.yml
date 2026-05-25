@@ -186,8 +186,6 @@ jobs:
           if [ -n "$AMZN_BASELINE_ID" ] && [ "$AMZN_BASELINE_ID" != "None" ]; then
             terraform import module.patch_manager.aws_ssm_patch_baseline.amazon_linux \
               "$AMZN_BASELINE_ID" 2>&1 || true
-            terraform import module.patch_manager.aws_ssm_patch_group.web_servers \
-              "${AMZN_BASELINE_ID},LinuxAutomation-WebServers" 2>&1 || true
           fi
 
           # SSM Patch Baseline (Default)
