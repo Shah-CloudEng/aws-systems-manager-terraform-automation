@@ -159,6 +159,12 @@ jobs:
         id: init
         run: terraform init -no-color
 
+      - name: Import IAM Resources
+        run: |
+          terraform import module.iam_ssm.aws_iam_role.ssm_role EC2-SSM-WebServer-Role 2>&1 || true
+          terraform import module.iam_ssm.aws_iam_instance_profile.ssm_profile EC2-SSM-WebServer-Profile 2>&1 || true
+          terraform import module.iam_ssm.aws_iam_role_policy.s3_ssm_logs EC2-SSM-WebServer-Role:SSM-S3-Logs-Policy 2>&1 || true
+
       - name: Terraform Apply
         id: apply
         run: terraform apply -auto-approve -input=false
