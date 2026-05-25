@@ -139,6 +139,7 @@ module "alb" {
   vpc_id                     = var.existing_vpc_id
   subnet_ids                 = var.public_subnet_ids
   security_group_ids         = [module.security_groups.alb_security_group_id]
+  instance_count             = var.instance_count
   instance_ids               = module.ec2_fleet.instance_ids
   enable_deletion_protection = var.enable_deletion_protection
   idle_timeout               = var.alb_idle_timeout

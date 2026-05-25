@@ -23,6 +23,11 @@ variable "security_group_ids" {
   type        = list(string)
 }
 
+variable "instance_count" {
+  description = "Number of EC2 instances to attach to the target group"
+  type        = number
+}
+
 variable "instance_ids" {
   description = "List of EC2 instance IDs to register with target group"
   type        = list(string)

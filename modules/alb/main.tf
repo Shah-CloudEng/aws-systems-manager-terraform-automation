@@ -70,7 +70,7 @@ resource "aws_lb_target_group" "web_servers" {
 
 # Target Group Attachments - Register EC2 Instances
 resource "aws_lb_target_group_attachment" "web_servers" {
-  count = length(var.instance_ids)
+  count = var.instance_count
 
   target_group_arn = aws_lb_target_group.web_servers.arn
   target_id        = var.instance_ids[count.index]
