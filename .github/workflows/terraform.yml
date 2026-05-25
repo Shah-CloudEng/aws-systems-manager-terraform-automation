@@ -159,11 +159,49 @@ jobs:
         id: init
         run: terraform init -no-color
 
-      - name: Import IAM Resources
+      - name: Import Existing Resources
         run: |
-          terraform import module.iam_ssm.aws_iam_role.ssm_role EC2-SSM-WebServer-Role 2>&1 || true
-          terraform import module.iam_ssm.aws_iam_instance_profile.ssm_profile EC2-SSM-WebServer-Profile 2>&1 || true
-          terraform import module.iam_ssm.aws_iam_role_policy.s3_ssm_logs EC2-SSM-WebServer-Role:SSM-S3-Logs-Policy 2>&1 || true
+          # IAM - EC2 SSM role (hardcoded name, survives env changes)
+          terraform import module.iam_ssm.aws_iam_role.ssm_role \
+            EC2-SSM-WebServer-Role 2>&1 || true
+          terraform import module.iam_ssm.aws_iam_instance_profile.ssm_profile \
+            EC2-SSM-WebServer-Profile 2>&1 || true
+          terraform import module.iam_ssm.aws_iam_role_policy.s3_ssm_logs \
+            EC2-SSM-WebServer-Role:SSM-S3-Logs-Policy 2>&1 || true
+
+          # IAM - Maintenance Window role (project-name only, no env in name)
+          terraform import module.patch_manager.aws_iam_role.ssm_maintenance_window \
+            LinuxAutomation-SSM-MaintenanceWindow-Role 2>&1 || true
+          terraform import module.patch_manager.aws_iam_role_policy.ssm_maintenance_custom \
+            LinuxAutomation-SSM-MaintenanceWindow-Role:SSM-Maintenance-Custom-Policy 2>&1 || true
+          terraform import module.patch_manager.aws_iam_role_policy_attachment.ssm_maintenance_policy \
+            LinuxAutomation-SSM-MaintenanceWindow-Role/arn:aws:iam::aws:policy/service-role/AmazonSSMMaintenanceWindowRole 2>&1 || true
+
+          # SSM Patch Baseline + Patch Group
+          BASELINE_ID=$(aws ssm describe-patch-baselines \
+            --filters "Key=OWNER,Values=Self" \
+            --query "BaselineIdentities[?contains(BaselineName, 'LinuxAutomation') && OperatingSystem=='AMAZON_LINUX_2023'] | [0].BaselineId" \
+            --output text 2>/dev/null)
+          if [ -n "$BASELINE_ID" ] && [ "$BASELINE_ID" != "None" ]; then
+            terraform import module.patch_manager.aws_ssm_patch_baseline.amazon_linux \
+              "$BASELINE_ID" 2>&1 || true
+            terraform import module.patch_manager.aws_ssm_patch_group.web_servers \
+              "$BASELINE_ID,LinuxAutomation-WebServers" 2>&1 || true
+          fi
+
+          # SSM Document
+          terraform import module.systems_manager.aws_ssm_document.install_apache \
+            LinuxAutomation-Install-Apache 2>&1 || true
+
+          # SSM Association (lookup by name)
+          ASSOC_ID=$(aws ssm list-associations \
+            --association-filter-list "key=AssociationName,value=LinuxAutomation-Apache-Deployment" \
+            --query 'Associations[0].AssociationId' \
+            --output text 2>/dev/null)
+          if [ -n "$ASSOC_ID" ] && [ "$ASSOC_ID" != "None" ]; then
+            terraform import module.systems_manager.aws_ssm_association.apply_apache_config \
+              "$ASSOC_ID" 2>&1 || true
+          fi
 
       - name: Terraform Apply
         id: apply
