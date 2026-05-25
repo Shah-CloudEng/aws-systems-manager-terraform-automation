@@ -13,9 +13,10 @@ resource "aws_s3_bucket" "ssm_logs" {
     Purpose     = "LogStorage"
   }
 
-  # Prevent accidental deletion in production
+  force_destroy = true
+
   lifecycle {
-    prevent_destroy = false # Set to true for production
+    prevent_destroy = false
   }
 }
 

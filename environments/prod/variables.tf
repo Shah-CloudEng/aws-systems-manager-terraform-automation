@@ -13,7 +13,7 @@ variable "project_name" {
 variable "environment" {
   description = "Environment name"
   type        = string
-  default     = "Production"
+  default     = "Capstone"
 }
 
 # Existing VPC Configuration
@@ -50,7 +50,7 @@ variable "allowed_ssh_cidr" {
 variable "instance_count" {
   description = "Number of EC2 instances to create"
   type        = number
-  default     = 2 # Free tier: 750 hours/month = ~1 instance 24/7, using 2 for HA
+  default     = 5
 }
 
 variable "instance_type" {

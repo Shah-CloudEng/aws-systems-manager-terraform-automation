@@ -22,8 +22,8 @@ provider "aws" {
   default_tags {
     tags = {
       Project     = "LinuxAutomation"
-      Environment = "Production"
-      ManagedBy   = "Terraform"
+      Environment = "Capstone"
+      ManagedBy   = "SSM"
       Owner       = "DevOps-Team"
       Repository  = "aws-systems-manager-linux-automation"
     }

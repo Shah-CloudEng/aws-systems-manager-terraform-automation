@@ -45,7 +45,7 @@ resource "aws_instance" "web_servers" {
     Project     = var.project_name
     Environment = var.environment
     Role        = "WebServer"
-    ManagedBy   = "SystemsManager"
+    ManagedBy   = "SSM"
     ServerIndex = tostring(count.index + 1)
   }
 
