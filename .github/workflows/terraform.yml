@@ -4,11 +4,15 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
   id-token: write
   contents: read
+  pull-requests: write
 
 env:
   AWS_REGION: us-east-1
@@ -21,7 +25,7 @@ jobs:
     defaults:
       run:
         working-directory: ./environments/prod
-    
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -46,7 +50,7 @@ jobs:
     defaults:
       run:
         working-directory: ./environments/prod
-    
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -62,14 +66,35 @@ jobs:
         with:
           terraform_version: ${{ env.TF_VERSION }}
 
+      - name: Create terraform.tfvars
+        run: echo "${{ secrets.TF_VARS }}" > terraform.tfvars
+
       - name: Terraform Init
         id: init
-        run: terraform init
+        run: terraform init -no-color
 
       - name: Terraform Plan
         id: plan
-        run: terraform plan -no-color -input=false
+        shell: bash
+        run: |
+          set -o pipefail
+          terraform plan -no-color -input=false 2>&1 | tee /tmp/plan_output.txt
         continue-on-error: true
+
+      - name: Write Plan to Job Summary
+        if: always()
+        run: |
+          echo "## Terraform Plan" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Status:** \`${{ steps.plan.outcome }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "<details><summary>Show Plan Output</summary>" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo '```hcl' >> $GITHUB_STEP_SUMMARY
+          cat /tmp/plan_output.txt >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "</details>" >> $GITHUB_STEP_SUMMARY
 
       - name: Add Plan to PR Comment
         if: github.event_name == 'pull_request'
@@ -77,20 +102,22 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
+            const fs = require('fs');
+            const planOutput = fs.readFileSync('/tmp/plan_output.txt', 'utf8');
             const output = `#### Terraform Plan 📖
-            
+
             **Status:** ${{ steps.plan.outcome }}
-            
+
             <details><summary>Show Plan</summary>
-            
+
             \`\`\`terraform
-            ${{ steps.plan.outputs.stdout }}
+            ${planOutput}
             \`\`\`
-            
+
             </details>
-            
+
             *Pushed by: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
-            
+
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
@@ -111,7 +138,7 @@ jobs:
     defaults:
       run:
         working-directory: ./environments/prod
-    
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -127,9 +154,12 @@ jobs:
         with:
           terraform_version: ${{ env.TF_VERSION }}
 
+      - name: Create terraform.tfvars
+        run: echo "${{ secrets.TF_VARS }}" > terraform.tfvars
+
       - name: Terraform Init
         id: init
-        run: terraform init
+        run: terraform init -no-color
 
       - name: Terraform Apply
         id: apply
@@ -137,11 +167,11 @@ jobs:
 
       - name: Output Summary
         run: |
-          echo "## 🚀 Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "## Deployment Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Environment:** Production" >> $GITHUB_STEP_SUMMARY
           echo "**Region:** ${{ env.AWS_REGION }}" >> $GITHUB_STEP_SUMMARY
-          echo "**Status:** ✅ Successfully Deployed" >> $GITHUB_STEP_SUMMARY
+          echo "**Status:** Successfully Deployed" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Next Steps:" >> $GITHUB_STEP_SUMMARY
           echo "1. Verify EC2 instances in Fleet Manager" >> $GITHUB_STEP_SUMMARY
