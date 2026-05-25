@@ -4,7 +4,7 @@ data "aws_region" "current" {}
 
 # S3 Bucket for SSM and operational logs
 resource "aws_s3_bucket" "ssm_logs" {
-  bucket = "${var.project_name}-${var.environment}-ssm-logs-${data.aws_caller_identity.current.account_id}"
+  bucket = lower("${var.project_name}-${var.environment}-ssm-logs-${data.aws_caller_identity.current.account_id}")
 
   tags = {
     Name        = "${var.project_name}-${var.environment}-SSM-Logs"

@@ -25,7 +25,7 @@ resource "aws_instance" "web_servers" {
   # Root volume configuration (Free Tier: 30 GB total EBS)
   root_block_device {
     volume_type           = "gp2" # gp2 is free tier eligible, gp3 is not
-    volume_size           = 10    # Reduced to 10 GB (free tier: 30 GB total)
+    volume_size           = 30    # Minimum required by Amazon Linux 2023 snapshot
     delete_on_termination = true
     encrypted             = true
 
