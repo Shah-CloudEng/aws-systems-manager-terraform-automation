@@ -159,6 +159,46 @@ jobs:
         id: init
         run: terraform init -no-color
 
+      - name: Import Existing Resources
+        run: |
+          echo "Importing any existing AWS resources into Terraform state..."
+
+          terraform import module.cloudwatch.aws_cloudwatch_log_group.ssm_logs \
+            /aws/ssm/LinuxAutomation-Production 2>&1 || true
+
+          terraform import module.cloudwatch.aws_cloudwatch_log_group.ec2_logs \
+            /aws/ec2/LinuxAutomation-Production 2>&1 || true
+
+          terraform import module.iam_ssm.aws_iam_role.ssm_role \
+            EC2-SSM-WebServer-Role 2>&1 || true
+
+          terraform import module.iam_ssm.aws_iam_instance_profile.ssm_profile \
+            EC2-SSM-WebServer-Profile 2>&1 || true
+
+          terraform import module.iam_ssm.aws_iam_role_policy.s3_ssm_logs \
+            EC2-SSM-WebServer-Role:SSM-S3-Logs-Policy 2>&1 || true
+
+          terraform import module.s3_logs.aws_s3_bucket.ssm_logs \
+            linuxautomation-production-ssm-logs-339713094763 2>&1 || true
+
+          ALB_SG_ID=$(aws ec2 describe-security-groups \
+            --filters "Name=group-name,Values=LinuxAutomation-Production-ALB-SG" \
+                      "Name=vpc-id,Values=vpc-0754ae0f2dc3994b4" \
+            --query 'SecurityGroups[0].GroupId' --output text 2>/dev/null)
+          if [ -n "$ALB_SG_ID" ] && [ "$ALB_SG_ID" != "None" ]; then
+            terraform import module.security_groups.aws_security_group.alb "$ALB_SG_ID" 2>&1 || true
+          fi
+
+          EC2_SG_ID=$(aws ec2 describe-security-groups \
+            --filters "Name=group-name,Values=LinuxAutomation-Production-EC2-SG" \
+                      "Name=vpc-id,Values=vpc-0754ae0f2dc3994b4" \
+            --query 'SecurityGroups[0].GroupId' --output text 2>/dev/null)
+          if [ -n "$EC2_SG_ID" ] && [ "$EC2_SG_ID" != "None" ]; then
+            terraform import module.security_groups.aws_security_group.ec2 "$EC2_SG_ID" 2>&1 || true
+          fi
+
+          echo "Import complete."
+
       - name: Terraform Apply
         id: apply
         run: terraform apply -auto-approve -input=false
