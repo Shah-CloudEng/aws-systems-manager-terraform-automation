@@ -197,6 +197,62 @@ jobs:
             terraform import module.security_groups.aws_security_group.ec2 "$EC2_SG_ID" 2>&1 || true
           fi
 
+          # CloudWatch Log Streams
+          terraform import module.cloudwatch.aws_cloudwatch_log_stream.ssm_run_command \
+            "/aws/ssm/LinuxAutomation-Production:ssm-run-command" 2>&1 || true
+          terraform import module.cloudwatch.aws_cloudwatch_log_stream.ssm_associations \
+            "/aws/ssm/LinuxAutomation-Production:ssm-associations" 2>&1 || true
+          terraform import module.cloudwatch.aws_cloudwatch_log_stream.patch_manager \
+            "/aws/ssm/LinuxAutomation-Production:patch-manager" 2>&1 || true
+
+          # Security Group Rules - ALB SG
+          if [ -n "$ALB_SG_ID" ] && [ "$ALB_SG_ID" != "None" ]; then
+            ALB_HTTP=$(aws ec2 describe-security-group-rules \
+              --filter "Name=group-id,Values=$ALB_SG_ID" \
+              --query 'SecurityGroupRules[?IpProtocol==`tcp` && FromPort==`80` && IsEgress==`false`].SecurityGroupRuleId' \
+              --output text 2>/dev/null)
+            [ -n "$ALB_HTTP" ] && [ "$ALB_HTTP" != "None" ] && \
+              terraform import module.security_groups.aws_vpc_security_group_ingress_rule.alb_http "$ALB_HTTP" 2>&1 || true
+
+            ALB_HTTPS=$(aws ec2 describe-security-group-rules \
+              --filter "Name=group-id,Values=$ALB_SG_ID" \
+              --query 'SecurityGroupRules[?IpProtocol==`tcp` && FromPort==`443` && IsEgress==`false`].SecurityGroupRuleId' \
+              --output text 2>/dev/null)
+            [ -n "$ALB_HTTPS" ] && [ "$ALB_HTTPS" != "None" ] && \
+              terraform import module.security_groups.aws_vpc_security_group_ingress_rule.alb_https "$ALB_HTTPS" 2>&1 || true
+
+            ALB_EGRESS=$(aws ec2 describe-security-group-rules \
+              --filter "Name=group-id,Values=$ALB_SG_ID" \
+              --query 'SecurityGroupRules[?IsEgress==`true`].SecurityGroupRuleId' \
+              --output text 2>/dev/null)
+            [ -n "$ALB_EGRESS" ] && [ "$ALB_EGRESS" != "None" ] && \
+              terraform import module.security_groups.aws_vpc_security_group_egress_rule.alb_egress "$ALB_EGRESS" 2>&1 || true
+          fi
+
+          # Security Group Rules - EC2 SG
+          if [ -n "$EC2_SG_ID" ] && [ "$EC2_SG_ID" != "None" ]; then
+            EC2_HTTP=$(aws ec2 describe-security-group-rules \
+              --filter "Name=group-id,Values=$EC2_SG_ID" \
+              --query 'SecurityGroupRules[?IpProtocol==`tcp` && FromPort==`80` && IsEgress==`false`].SecurityGroupRuleId' \
+              --output text 2>/dev/null)
+            [ -n "$EC2_HTTP" ] && [ "$EC2_HTTP" != "None" ] && \
+              terraform import module.security_groups.aws_vpc_security_group_ingress_rule.ec2_http_from_alb "$EC2_HTTP" 2>&1 || true
+
+            EC2_SSH=$(aws ec2 describe-security-group-rules \
+              --filter "Name=group-id,Values=$EC2_SG_ID" \
+              --query 'SecurityGroupRules[?IpProtocol==`tcp` && FromPort==`22` && IsEgress==`false`].SecurityGroupRuleId' \
+              --output text 2>/dev/null)
+            [ -n "$EC2_SSH" ] && [ "$EC2_SSH" != "None" ] && \
+              terraform import module.security_groups.aws_vpc_security_group_ingress_rule.ec2_ssh "$EC2_SSH" 2>&1 || true
+
+            EC2_EGRESS=$(aws ec2 describe-security-group-rules \
+              --filter "Name=group-id,Values=$EC2_SG_ID" \
+              --query 'SecurityGroupRules[?IsEgress==`true`].SecurityGroupRuleId' \
+              --output text 2>/dev/null)
+            [ -n "$EC2_EGRESS" ] && [ "$EC2_EGRESS" != "None" ] && \
+              terraform import module.security_groups.aws_vpc_security_group_egress_rule.ec2_egress "$EC2_EGRESS" 2>&1 || true
+          fi
+
           echo "Import complete."
 
       - name: Terraform Apply

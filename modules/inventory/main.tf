@@ -20,75 +20,16 @@ resource "aws_ssm_association" "inventory" {
 
   # Inventory collection parameters
   parameters = {
-    applications = jsonencode([
-      {
-        parameterName  = "applications"
-        parameterValue = "Enabled"
-      }
-    ])
-
-    awsComponents = jsonencode([
-      {
-        parameterName  = "awsComponents"
-        parameterValue = "Enabled"
-      }
-    ])
-
-    files = jsonencode([
-      {
-        parameterName  = "files"
-        parameterValue = ""
-      }
-    ])
-
-    networkConfig = jsonencode([
-      {
-        parameterName  = "networkConfig"
-        parameterValue = "Enabled"
-      }
-    ])
-
-    services = jsonencode([
-      {
-        parameterName  = "services"
-        parameterValue = "Enabled"
-      }
-    ])
-
-    windowsUpdates = jsonencode([
-      {
-        parameterName  = "windowsUpdates"
-        parameterValue = "Disabled"
-      }
-    ])
-
-    instanceDetailedInformation = jsonencode([
-      {
-        parameterName  = "instanceDetailedInformation"
-        parameterValue = "Enabled"
-      }
-    ])
-
-    windowsRegistry = jsonencode([
-      {
-        parameterName  = "windowsRegistry"
-        parameterValue = ""
-      }
-    ])
-
-    windowsRoles = jsonencode([
-      {
-        parameterName  = "windowsRoles"
-        parameterValue = "Disabled"
-      }
-    ])
-
-    customInventory = jsonencode([
-      {
-        parameterName  = "customInventory"
-        parameterValue = ""
-      }
-    ])
+    applications                = ["Enabled"]
+    awsComponents               = ["Enabled"]
+    networkConfig               = ["Enabled"]
+    services                    = ["Enabled"]
+    instanceDetailedInformation = ["Enabled"]
+    windowsUpdates              = ["Disabled"]
+    windowsRoles                = ["Disabled"]
+    windowsRegistry             = [""]
+    customInventory             = [""]
+    files                       = [""]
   }
 
   # Compliance severity
