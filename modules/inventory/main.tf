@@ -20,16 +20,16 @@ resource "aws_ssm_association" "inventory" {
 
   # Inventory collection parameters
   parameters = {
-    applications                = ["Enabled"]
-    awsComponents               = ["Enabled"]
-    networkConfig               = ["Enabled"]
-    services                    = ["Enabled"]
-    instanceDetailedInformation = ["Enabled"]
-    windowsUpdates              = ["Disabled"]
-    windowsRoles                = ["Disabled"]
-    windowsRegistry             = [""]
-    customInventory             = [""]
-    files                       = [""]
+    applications                = "Enabled"
+    awsComponents               = "Enabled"
+    networkConfig               = "Enabled"
+    services                    = "Enabled"
+    instanceDetailedInformation = "Enabled"
+    windowsUpdates              = "Disabled"
+    windowsRoles                = "Disabled"
+    windowsRegistry             = ""
+    customInventory             = ""
+    files                       = ""
   }
 
   # Compliance severity
