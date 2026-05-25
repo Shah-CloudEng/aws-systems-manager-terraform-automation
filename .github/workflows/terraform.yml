@@ -20,9 +20,6 @@ permissions:
 env:
   AWS_REGION: us-east-1
   TF_VERSION: 1.8.0
-  TF_VAR_existing_vpc_id: "vpc-0754ae0f2dc3994b4"
-  TF_VAR_public_subnet_ids: '["subnet-005124b9f7d860f27","subnet-0dd04eb42760b7764"]'
-  TF_VAR_private_subnet_ids: '["subnet-03601c8d266296efb","subnet-0c8d80e674242de73"]'
 
 jobs:
   terraform-validate:

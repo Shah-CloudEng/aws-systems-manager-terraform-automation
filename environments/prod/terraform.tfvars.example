@@ -5,21 +5,8 @@ aws_region = "us-east-1"
 project_name = "LinuxAutomation"
 environment  = "Production"
 
-# Existing VPC Configuration
-# IMPORTANT: Replace these with your actual VPC and subnet IDs
-existing_vpc_id = "vpc-xxxxxxxxxxxxxxxxx"
-
-# Public subnets for ALB (must be in different AZs)
-public_subnet_ids = [
-  "subnet-xxxxxxxxxxxxxxxxx", # us-east-1a
-  "subnet-yyyyyyyyyyyyyyyyy"  # us-east-1b
-]
-
-# Private subnets for EC2 instances (must be in different AZs)
-private_subnet_ids = [
-  "subnet-zzzzzzzzzzzzzzzzz", # us-east-1a
-  "subnet-aaaaaaaaaaaaaaaa"   # us-east-1b
-]
+# VPC Configuration (Terraform creates a custom VPC automatically)
+vpc_cidr = "10.0.0.0/16"
 
 # SSH Access Configuration
 # Replace with your IP range or VPC CIDR

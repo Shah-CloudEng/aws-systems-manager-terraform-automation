@@ -16,28 +16,11 @@ variable "environment" {
   default     = "Capstone"
 }
 
-# Existing VPC Configuration
-variable "existing_vpc_id" {
-  description = "ID of the existing VPC to use"
+# VPC Configuration
+variable "vpc_cidr" {
+  description = "CIDR block for the custom VPC"
   type        = string
-}
-
-variable "public_subnet_ids" {
-  description = "List of existing public subnet IDs for ALB"
-  type        = list(string)
-  validation {
-    condition     = length(var.public_subnet_ids) >= 2
-    error_message = "At least 2 public subnets are required for ALB."
-  }
-}
-
-variable "private_subnet_ids" {
-  description = "List of existing private subnet IDs for EC2 instances"
-  type        = list(string)
-  validation {
-    condition     = length(var.private_subnet_ids) >= 2
-    error_message = "At least 2 private subnets are required for EC2 instances."
-  }
+  default     = "10.0.0.0/16"
 }
 
 variable "allowed_ssh_cidr" {

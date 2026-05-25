@@ -19,9 +19,13 @@ data "aws_ami" "amazon_linux_2023" {
   }
 }
 
-# Data source for existing VPC
-data "aws_vpc" "existing" {
-  id = var.existing_vpc_id
+# Custom VPC with public subnets (ALB) and private subnets (EC2)
+module "vpc" {
+  source = "../../modules/vpc"
+
+  project_name = var.project_name
+  environment  = var.environment
+  vpc_cidr     = var.vpc_cidr
 }
 
 # IAM Role and Instance Profile for Systems Manager
@@ -36,26 +40,28 @@ module "iam_ssm" {
 module "security_groups" {
   source = "../../modules/security-groups"
 
-  vpc_id           = var.existing_vpc_id
+  vpc_id           = module.vpc.vpc_id
   project_name     = var.project_name
   environment      = var.environment
   allowed_ssh_cidr = var.allowed_ssh_cidr
+
+  depends_on = [module.vpc]
 }
 
-# EC2 Fleet (5 instances with SSM)
+# EC2 Fleet (5 instances with SSM) — placed in private subnets
 module "ec2_fleet" {
   source = "../../modules/ec2-fleet"
 
   instance_count            = var.instance_count
   instance_type             = var.instance_type
   ami_id                    = data.aws_ami.amazon_linux_2023.id
-  subnet_ids                = var.private_subnet_ids
+  subnet_ids                = module.vpc.private_subnet_ids
   security_group_ids        = [module.security_groups.ec2_security_group_id]
   iam_instance_profile_name = module.iam_ssm.instance_profile_name
   project_name              = var.project_name
   environment               = var.environment
 
-  depends_on = [module.iam_ssm]
+  depends_on = [module.iam_ssm, module.vpc]
 }
 
 # S3 Bucket for Logs
@@ -130,14 +136,14 @@ module "inventory" {
   ]
 }
 
-# Application Load Balancer with Target Group
+# Application Load Balancer — placed in public subnets, routes to EC2 in private subnets
 module "alb" {
   source = "../../modules/alb"
 
   project_name               = var.project_name
   environment                = var.environment
-  vpc_id                     = var.existing_vpc_id
-  subnet_ids                 = var.public_subnet_ids
+  vpc_id                     = module.vpc.vpc_id
+  subnet_ids                 = module.vpc.public_subnet_ids
   security_group_ids         = [module.security_groups.alb_security_group_id]
   instance_count             = var.instance_count
   instance_ids               = module.ec2_fleet.instance_ids
@@ -153,6 +159,7 @@ module "alb" {
   depends_on = [
     module.ec2_fleet,
     module.security_groups,
-    module.s3_logs
+    module.s3_logs,
+    module.vpc
   ]
 }

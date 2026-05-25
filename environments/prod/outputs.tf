@@ -1,6 +1,16 @@
 output "vpc_id" {
-  description = "VPC ID being used"
-  value       = var.existing_vpc_id
+  description = "VPC ID created for this deployment"
+  value       = module.vpc.vpc_id
+}
+
+output "public_subnet_ids" {
+  description = "Public subnet IDs (ALB)"
+  value       = module.vpc.public_subnet_ids
+}
+
+output "private_subnet_ids" {
+  description = "Private subnet IDs (EC2)"
+  value       = module.vpc.private_subnet_ids
 }
 
 output "iam_role_name" {
