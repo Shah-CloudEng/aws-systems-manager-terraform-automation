@@ -27,9 +27,7 @@ resource "aws_ssm_association" "inventory" {
     instanceDetailedInformation = "Enabled"
     windowsUpdates              = "Disabled"
     windowsRoles                = "Disabled"
-    windowsRegistry             = ""
-    customInventory             = ""
-    files                       = ""
+    customInventory             = "Disabled"
   }
 
   # Compliance severity
