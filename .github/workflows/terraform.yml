@@ -177,16 +177,28 @@ jobs:
           terraform import module.patch_manager.aws_iam_role_policy_attachment.ssm_maintenance_policy \
             LinuxAutomation-SSM-MaintenanceWindow-Role/arn:aws:iam::aws:policy/service-role/AmazonSSMMaintenanceWindowRole 2>&1 || true
 
-          # SSM Patch Baseline + Patch Group
-          BASELINE_ID=$(aws ssm describe-patch-baselines \
+          # SSM Patch Baseline (AmazonLinux) + Patch Group
+          AMZN_BASELINE_ID=$(aws ssm describe-patch-baselines \
             --filters "Key=OWNER,Values=Self" \
-            --query "BaselineIdentities[?contains(BaselineName, 'LinuxAutomation') && OperatingSystem=='AMAZON_LINUX_2023'] | [0].BaselineId" \
-            --output text 2>/dev/null)
-          if [ -n "$BASELINE_ID" ] && [ "$BASELINE_ID" != "None" ]; then
+            --query "BaselineIdentities[?contains(BaselineName, 'AmazonLinux') && OperatingSystem=='AMAZON_LINUX_2023'].BaselineId | [0]" \
+            --output text 2>/dev/null | tr -d '[:space:]')
+          echo "AmazonLinux baseline ID: $AMZN_BASELINE_ID"
+          if [ -n "$AMZN_BASELINE_ID" ] && [ "$AMZN_BASELINE_ID" != "None" ]; then
             terraform import module.patch_manager.aws_ssm_patch_baseline.amazon_linux \
-              "$BASELINE_ID" 2>&1 || true
+              "$AMZN_BASELINE_ID" 2>&1 || true
             terraform import module.patch_manager.aws_ssm_patch_group.web_servers \
-              "$BASELINE_ID,LinuxAutomation-WebServers" 2>&1 || true
+              "${AMZN_BASELINE_ID},LinuxAutomation-WebServers" 2>&1 || true
+          fi
+
+          # SSM Patch Baseline (Default)
+          DEFAULT_BASELINE_ID=$(aws ssm describe-patch-baselines \
+            --filters "Key=OWNER,Values=Self" \
+            --query "BaselineIdentities[?contains(BaselineName, 'Default') && OperatingSystem=='AMAZON_LINUX_2023'].BaselineId | [0]" \
+            --output text 2>/dev/null | tr -d '[:space:]')
+          echo "Default baseline ID: $DEFAULT_BASELINE_ID"
+          if [ -n "$DEFAULT_BASELINE_ID" ] && [ "$DEFAULT_BASELINE_ID" != "None" ]; then
+            terraform import module.patch_manager.aws_ssm_patch_baseline.default_baseline \
+              "$DEFAULT_BASELINE_ID" 2>&1 || true
           fi
 
           # SSM Document
