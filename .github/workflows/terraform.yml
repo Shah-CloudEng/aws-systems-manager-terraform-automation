@@ -78,7 +78,12 @@ jobs:
           terraform_version: ${{ env.TF_VERSION }}
 
       - name: Create terraform.tfvars
-        run: echo "${{ vars.TF_VARS }}" > terraform.tfvars
+        env:
+          TF_VARS_CONTENT: ${{ vars.TF_VARS }}
+        run: |
+          echo "$TF_VARS_CONTENT" > terraform.tfvars
+          echo "=== terraform.tfvars written ==="
+          cat terraform.tfvars
 
       - name: Terraform Init
         id: init
