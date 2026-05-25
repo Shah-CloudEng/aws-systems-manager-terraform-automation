@@ -231,8 +231,3 @@ data "aws_iam_policy_document" "ssm_maintenance_custom" {
   }
 }
 
-# Patch Group association
-resource "aws_ssm_patch_group" "web_servers" {
-  baseline_id = aws_ssm_patch_baseline.amazon_linux.id
-  patch_group = "${var.project_name}-${var.environment}-WebServers"
-}
