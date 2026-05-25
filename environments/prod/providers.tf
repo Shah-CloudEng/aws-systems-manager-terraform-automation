@@ -8,15 +8,12 @@ terraform {
     }
   }
 
-  # Backend configuration for state management
-  # Uncomment and configure for production use
-  # backend "s3" {
-  #   bucket         = "your-terraform-state-bucket"
-  #   key            = "aws-systems-manager/prod/terraform.tfstate"
-  #   region         = "us-east-1"
-  #   encrypt        = true
-  #   dynamodb_table = "terraform-state-lock"
-  # }
+  backend "s3" {
+    bucket  = "linuxautomation-tfstate-339713094763"
+    key     = "prod/terraform.tfstate"
+    region  = "us-east-1"
+    encrypt = true
+  }
 }
 
 provider "aws" {

@@ -59,7 +59,9 @@ data "aws_iam_policy_document" "s3_ssm_logs" {
 
     resources = [
       "arn:aws:s3:::*-ssm-logs-*",
-      "arn:aws:s3:::*-ssm-logs-*/*"
+      "arn:aws:s3:::*-ssm-logs-*/*",
+      "arn:aws:s3:::linuxautomation-tfstate-*",
+      "arn:aws:s3:::linuxautomation-tfstate-*/*"
     ]
   }
 
